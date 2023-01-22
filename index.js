@@ -14,6 +14,13 @@ const conn = require('./db/conn')
 const Pensamento = require('./models/Pensamento')
 const User = require('./models/User')
 
+// import Routes
+
+const  pensamentosRoutes  = require('./routes/pensamentosRoutes')
+
+// import Controller
+const PensamentoController = require('./controllers/PensamentoController')
+
 
 //template engine
 
@@ -71,9 +78,13 @@ app.use((req, res, next) => {
 
     next()
     
-    
 })
 
+//Routes
+
+app.use('/pensamentos', pensamentosRoutes)
+
+app.get('/', PensamentoController.showPensamentos)
 
 conn
 //.sync({ force: true}) - caso precise reiniciar a base de dados
