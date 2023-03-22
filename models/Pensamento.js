@@ -4,6 +4,7 @@ const db = require('../db/conn')
 
 
 const User = require('./User')
+
 //User
 const Pensamento = db.define('Pensamento', {
     title: {
@@ -16,4 +17,4 @@ const Pensamento = db.define('Pensamento', {
 Pensamento.belongsTo(User)
 User.hasMany(Pensamento)
 
-module.exprts = Pensamento
+module.exports = Pensamento

@@ -13,7 +13,7 @@ try {
     sequelize.authenticate()
     console.log('conectamos ao sequelize')
 } catch (error) {
-    console.log('Não foi possível conectar')
+    console.log(`Não foi possível conectar: ${err}`)
 }
 
 module.exports = sequelize
