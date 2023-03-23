@@ -17,6 +17,7 @@ const User = require('./models/User')
 // import Routes
 
 const  pensamentosRoutes  = require('./routes/pensamentosRoutes')
+const authRoutes = require('./routes/authRoutes')
 
 // import Controller
 const PensamentoController = require('./controllers/PensamentoController')
@@ -83,8 +84,11 @@ app.use((req, res, next) => {
 //Routes
 
 app.use('/pensamentos', pensamentosRoutes)
+app.use('/', authRoutes)
 
 app.get('/', PensamentoController.showPensamentos)
+
+
 
 conn
 //.sync({ force: true}) //- caso precise reiniciar a base de dados
