@@ -77,7 +77,7 @@ app.use((req, res, next) => {
         res.locals.session = req.session
     } 
 
-    next()
+    next();
     
 })
 
@@ -91,7 +91,7 @@ app.get('/', PensamentoController.showPensamentos)
 
 
 conn
-//.sync({ force: true}) //- caso precise reiniciar a base de dados
+//.sync({force: true}) //- caso precise reiniciar a base de dados
 .sync()
 .then (() => {
     app.listen(3000)

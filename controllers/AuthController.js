@@ -2,70 +2,101 @@ const User = require('../models/User')
 
 const bcrypt = require('bcryptjs')
 
+module.exports = class UserController {
+  static login(req, res) {
+    res.render('auth/login')
+  }
 
-module.exports = class AuthController{
-    static login(req, res) {
-        res.render('auth/login')
-    };
+  static async loginPost(req, res) {
+    const { email, password } = req.body
 
-    static register(req, res) {
-        res.render('auth/register')
-    };
+    // find user
+    const user = await User.findOne({ where: { email: email } })
 
-    static async registerPost(req, res) {
-       
-        const {name, email, password, confirmpassword } = req.body
+    if (!user) {
+      res.render('auth/login', {
+        message: 'Usuário não encontrado!',
+      })
 
-        // Validação do password
+      return
+    }
 
-        if (password != confirmpassword) {
-            // mensagem
-            req.flash('message', 'As senhas não conferem, porfavor verifique e tente novamente')
-            res.render('auth/register')
+    // compare password
+    const passwordMatch = bcrypt.compareSync(password, user.password)
 
-            return
-            
-        }
+    if (!passwordMatch) {
+      res.render('auth/login', {
+        message: 'Senha inválida!',
+      })
 
-        // check if user exists
+      return
+    }
 
-        const checkIfUserExists = await User.findOne({where: { email: email } })
+    // auth user
+    req.session.userid = user.id
 
-        if (checkIfUserExists) {
-            req.flash('message', 'O e-mail já está em uso!')
-            res.render('auth/register')
+    req.flash('message', 'Login realizado com sucesso!')
 
-            return
-        }
+    req.session.save(() => {
+      res.redirect('/')
+    })
+  }
 
-        // create a password
-        
-        const salt = bcrypt.genSaltSync(10)
-        const hashedPassword = bcrypt.hashSync(password, salt)
+  static register(req, res) {
+    res.render('auth/register')
+  }
 
-        const user = {
-            name,
-            email,
-            password: hashedPassword
-        }
+  static async registerPost(req, res) {
+    const { name, email, password, confirmpassword } = req.body
 
-        try {
+    // passwords match validation
+    if (password != confirmpassword) {
+      req.flash('message', 'As senhas não conferem, tente novamente!')
+      res.render('auth/register')
 
-            const createdUser = await User.create(user)
+      return
+    }
 
-            // initialize session
-            req.session.userid = createdUser.id
-            
-            req.flash('message', ' Cadastro realizado com sucesso')
-            
-            req.session.save(()=> {
-                res.redirect('/')
-            })
-            
-        } catch (error) {
-            
-            console.log(err)
-        }
-    };
+    // email validation
+    const checkIfUserExists = await User.findOne({ where: { email: email } })
 
-}   
+    if (checkIfUserExists) {
+      req.flash('message', 'O e-mail já está em uso!')
+      res.render('auth/register')
+
+      return
+    }
+
+    const salt = bcrypt.genSaltSync(10)
+    const hashedPassword = bcrypt.hashSync(password, salt)
+
+    const user = {
+      name,
+      email,
+      password: hashedPassword,
+    }
+
+    User.create(user)
+      .then((user) => {
+        // initialize session
+        req.session.userid = user.id
+
+        // console.log('salvou dado')
+        // console.log(req.session.userid)
+
+        req.session.userid = user.id
+
+        req.flash('message', 'Cadastro realizado com sucesso!')
+
+        req.session.save(() => {
+          res.redirect('/')
+        })
+      })
+      .catch((err) => console.log(err))
+  }
+
+  static logout(req, res) {
+    req.session.destroy()
+    res.redirect('/login')
+  }
+}
