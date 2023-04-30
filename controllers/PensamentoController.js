@@ -15,5 +15,26 @@ module.exports = class PensamentoController {
         res.render('pesamentos/create')
     }
 
+    static async createPensamentoSave(req, res) {
 
+        const pensamento = {
+            title: req.body.title,
+            UserId: req.session.userid
+        }
+
+        try {
+
+            await pensamento.create(pensamento)
+
+            req.flash('message', 'pensamento creaido com sucesso!')
+
+            req.session.save(() => {
+            res.redirect('/pesamentos/dashboard')
+            })
+            
+        } catch (error) {
+            console.log('Aconteceu um erro: ' + error)
+        }
+        
+    }
 }
