@@ -1,7 +1,7 @@
 const Pensamento = require ('../models/Pensamento')
 const User = require ('../models/User')
 
-const { Op } = rquire('sequelize')
+const { Op } = require('sequelize')
 
 module.exports = class PensamentoController {
     static async showPensamentos(req, res){
