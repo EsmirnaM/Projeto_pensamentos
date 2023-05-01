@@ -1,15 +1,44 @@
 const Pensamento = require ('../models/Pensamento')
 const User = require ('../models/User')
 
+const { Op } = rquire('sequelize')
+
 module.exports = class PensamentoController {
     static async showPensamentos(req, res){
 
+        let search = ''
+
+        if(req.query.search) {
+            search = req.query.search
+        }
+
+        let order = 'DESC'
+
+        if (req.query.order === 'old') {
+            order = 'ASC'
+        } else {
+            order = 'DESC'
+        }
+
         const pensamentosData = Pensamento.findAll({
             include: User,
+            where: {
+                title: {[Op.like]: `%{search}%`},
+            },
+
+            order: [ [ 'createdAt', order] ],
+
         })
 
         const pensamentos = pensamentosData.map((result) => result.get({ plain: true}))
-        res.render('pensamentos/home', {pensamentos})
+        
+        let pensamentosQty = pensamentos.length
+
+        if(pensamentosQty === 0) {
+            pensamentosQty = false
+        }
+        
+        res.render('pensamentos/home', {pensamentos, search, pensamentosQty})
     }
 
     static async dashboard(req, res) {
